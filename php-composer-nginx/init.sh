@@ -1,1 +1,0 @@
-echo "Default container init"
