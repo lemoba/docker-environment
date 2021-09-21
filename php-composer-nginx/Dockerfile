@@ -1,5 +1,5 @@
 # php74-v1.0 - php:7.4.11-fpm-alpine + nginx
-FROM php:7.4.11-fpm-alpine
+FROM php:7.4.23-fpm-alpine
 COPY php.ini /usr/local/etc/php/conf.d/php.ini
 # install composer etc.
 RUN php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');" && \
@@ -28,7 +28,7 @@ RUN php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.ph
 #    apk -v --pure del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev && \
     # php extensions for others
     docker-php-ext-install pdo pdo_mysql ctype iconv opcache calendar exif bcmath mysqli zip && \
-    pecl install redis-4.0.1 && docker-php-ext-enable redis pdo_mysql && \
+    pecl install redis-5.3.4 && docker-php-ext-enable redis pdo_mysql && \
     apk -v --purge del --no-cache py-pip autoconf make gcc musl-dev g++ zlib-dev libzip-dev && \
     rm -rf /var/cache/apk/* && rm -rf /tmp/* && \
     # run nginx
