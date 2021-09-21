@@ -1,10 +1,10 @@
 # php74-v1.0 - php:7.4.11-fpm-alpine + nginx
-# php74-v1.1 - php:7.4.23-fpm-alpine + nginx update pecl redis 5.3.4
-FROM php:7.4.23-fpm-alpine
+FROM php:7.4.11-fpm-alpine
 COPY php.ini /usr/local/etc/php/conf.d/php.ini
 # install composer etc.
-RUN php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');" && \
+RUN php -r "copy('https://api.ylaila.com/composer-install', 'composer-setup.php');" && \
     php composer-setup.php && \
+    php -r "unlink('composer-setup.php');" && \
     mv composer.phar /usr/local/bin/composer && \
     # if running in china, you should open this, or you can exec it after docker run
     /usr/local/bin/composer config -g repo.packagist composer https://packagist.phpcomposer.com && \
@@ -29,7 +29,7 @@ RUN php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.ph
 #    apk -v --pure del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev && \
     # php extensions for others
     docker-php-ext-install pdo pdo_mysql ctype iconv opcache calendar exif bcmath mysqli zip && \
-    pecl install redis-5.3.4 && docker-php-ext-enable redis pdo_mysql && \
+    pecl install redis-4.0.1 && docker-php-ext-enable redis pdo_mysql && \
     apk -v --purge del --no-cache py-pip autoconf make gcc musl-dev g++ zlib-dev libzip-dev && \
     rm -rf /var/cache/apk/* && rm -rf /tmp/* && \
     # run nginx
