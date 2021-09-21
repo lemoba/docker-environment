@@ -1,4 +1,5 @@
 # php74-v1.0 - php:7.4.11-fpm-alpine + nginx
+# php74-v1.1 - php:7.4.23-fpm-alpine + nginx update pecl redis 5.3.4
 FROM php:7.4.23-fpm-alpine
 COPY php.ini /usr/local/etc/php/conf.d/php.ini
 # install composer etc.
