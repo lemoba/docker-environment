@@ -1,38 +1,42 @@
-FROM alpine:3.13
-
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
-    && apk add --update --no-cache \
-    php7 \
-    php7-fileinfo \
-    php7-curl \
-    php7-phar \
-    php7-fpm \
-    php7-dom \
-    php7-xmlwriter \
-    php7-xml \
-    php7-redis \
-    php7-json \
-    php7-ctype \
-	php7-exif \
-    php7-session \
-    php7-pdo_mysql \
-    php7-tokenizer \
-    nginx \
-    wget \
-    && rm -f /var/cache/apk/* \
-    && mkdir -p /run/nginx \
-    && mv /usr/sbin/php-fpm7 /usr/sbin/php-fpm
-
-# install composer
-RUN wget https://mirrors.aliyun.com/composer/composer.phar -O /usr/local/bin/composer \
+# php74-v1.0 - php:7.4.11-fpm-alpine + nginx
+FROM php:7.4.26-fpm-alpine3.15
+COPY php.ini /usr/local/etc/php/conf.d/php.ini
+# install composer etc.
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk update \
+    && apk add --no-cache -U autoconf make gcc musl-dev g++ zlib-dev libzip libzip-dev curl \
+    && apk add --no-cache -U freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev nginx \
+    && wget https://mirrors.aliyun.com/composer/composer.phar -O /usr/local/bin/composer \
     && chmod +x /usr/local/bin/composer \
-    && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+    && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
+    # php extensions gd with php74
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
+    && docker-php-ext-install -j${NPROC} gd \
+    # apk -v --pure del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev && \
+    # php extensions for others
+    && docker-php-ext-install pdo pdo_mysql ctype iconv opcache calendar exif bcmath mysqli zip \
+    && pecl install redis-5.3.5 && docker-php-ext-enable redis pdo_mysql \
+    && apk -v --purge del --no-cache py-pip autoconf make gcc musl-dev g++ zlib-dev libzip-dev \
+    && rm -rf /var/cache/apk/* && rm -rf /tmp/* \
+    # run nginx
+    # && mkdir /run/nginx \
+    && sed -i "s/www-data/nginx/g" /usr/local/etc/php-fpm.d/www.conf
+# php extension config
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
-# init nginx php config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY fpm.conf /etc/php7/php-fpm.d/www.conf
-COPY php.ini /etc/php7/php.ini
-COPY opcache.ini /etc/php7/conf.d/opcache.ini
+# init nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# set work directory
+# init entrypoint etc.
+COPY entrypoint.sh /usr/bin/entrypoint.sh
+COPY init.sh /usr/bin/init.sh
+RUN chmod +x /usr/bin/entrypoint.sh
+RUN chmod +x /usr/bin/init.sh
+
 WORKDIR /var/www/html
+ENTRYPOINT /usr/bin/entrypoint.sh
