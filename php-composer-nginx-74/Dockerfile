@@ -4,7 +4,7 @@ COPY php.ini /usr/local/etc/php/conf.d/php.ini
 # install composer etc.
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
     && apk update \
-    && apk add --no-cache -U autoconf make gcc musl-dev g++ zlib-dev libzip libzip-dev curl \
+    && apk add --no-cache -U autoconf make gcc musl-dev g++ zlib-dev libzip libzip-dev \
     && apk add --no-cache -U freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev nginx \
     && wget https://mirrors.aliyun.com/composer/composer.phar -O /usr/local/bin/composer \
     && chmod +x /usr/local/bin/composer \
