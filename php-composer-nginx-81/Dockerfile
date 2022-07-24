@@ -33,7 +33,7 @@ RUN php -r "copy('https://api.ylaila.com/composer-install', 'composer-setup.php'
     apk -v --purge del --no-cache py-pip autoconf make gcc musl-dev g++ zlib-dev libzip-dev && \
     rm -rf /var/cache/apk/* && rm -rf /tmp/* && \
     # run nginx
-    mkdir /run/nginx && \
+    # mkdir /run/nginx && \
     sed -i "s/www-data/nginx/g" /usr/local/etc/php-fpm.d/www.conf
 # php extension config
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
